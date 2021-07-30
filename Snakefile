@@ -176,7 +176,7 @@ rule snpsift_filter:
     "{sample}_CYP2C19.vcf"
     
   shell:
-    "grep -w '^#\|^#CHROM\|chr[1-9]\|chr[1-2][0-9]\|chr[X,Y,M]' 'CYP2C19'\" > {output}"
+    "grep -w '^#\|^#CHROM\|^chr[1-5]' 'CYP2C19.vcf'\" > {output}"
     
 rule plot_quals:
   
