@@ -23,7 +23,7 @@ rule fastp_filter:
     out="{sample}_fastp.txt"
     
   shell:
-    "fastp --thread 8 -i {input.fwd} -o {output.fwd} \
+    "fastp -i {input.fwd} -o {output.fwd} \
     -I {input.rev} -O {output.rev} --disable_adapter_trimming \
     --length_required 36 -3 --correction --json {output.json} \
     --html {output.html} 2> {output.out}"
@@ -40,7 +40,7 @@ rule fastqc:
      "{sample}_fastqc.zip"
     
   shell:
-     "fastqc -t 8 {input}"
+     "fastqc -t {input}"
 
 rule bwa_mem:
   
@@ -53,7 +53,7 @@ rule bwa_mem:
      temp("{sample}.sam")
   
   shell:
-     "bwa mem -t 8 -R '@RG\\tID:1\\tLB:library\\tPL:Illumina\\tPU:lane1\\tSM:NA12878' \
+     "bwa mem -R '@RG\\tID:1\\tLB:library\\tPL:Illumina\\tPU:lane1\\tSM:NA12878' \
      {input.ref} {input.fwd} {input.rev} > {output}"
 
 rule sam_to_bam:
@@ -65,7 +65,7 @@ rule sam_to_bam:
     temp("{sample}.bam")
     
   shell:
-     "samtools view -b {input} -o {output} -@ 8"
+     "samtools view -b {input} -o {output}"
 
 rule samtools_sort:
   
@@ -99,7 +99,7 @@ rule samtools_flagstat:
     "{sample}_flagstats.txt"
     
   shell:
-    "samtools flagstat {input} -@ 8 > {output}"
+    "samtools flagstat {input} > {output}"
 
 rule picard_remove_duplicates:
   
@@ -112,7 +112,7 @@ rule picard_remove_duplicates:
     
   shell:
     "picard MarkDuplicates I={input} O={output.bam} \
-    METRICS_FILE={output.metrics} REMOVE_DUPLICATES=true"
+     METRICS_FILE={output.metrics} REMOVE_DUPLICATES=true"
 
 rule gatk_haplotype_caller:
   
