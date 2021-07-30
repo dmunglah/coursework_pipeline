@@ -32,68 +32,72 @@ rule fastqc:
   
   input:
     
-    "{sample}.fastq.gz"
+     "{sample}.fastq.gz"
     
   output:
     
-    "{sample}_fastqc.html",
-    "{sample}_fastqc.zip"
+     "{sample}_fastqc.html",
+     "{sample}_fastqc.zip"
     
   shell:
-    "fastqc -t 8 {input}"
+     "fastqc -t 8 {input}"
 
 rule bwa_mem:
   
   input:
-    ref="/home/jovyan/pipeline_data/Homo_sapiens.GRCh38.dna.primary_assembly.fa",
-    fwd="{sample}_1_fastp.fastq.gz",
-    rev="{sample}_2_fastp.fastq.gz"
+     ref="/home/jovyan/pipeline_data/Homo_sapiens.GRCh38.dna.primary_assembly.fa",
+     fwd="{sample}_1_fastp.fastq.gz",
+     rev="{sample}_2_fastp.fastq.gz"
     
   output:
-    temp("{sample}.sam")
+     temp("{sample}.sam")
   
   shell:
-    "bwa mem -t 8 -R '@RG\\tID:1\\tLB:library\\tPL:Illumina\\tPU:lane1\\tSM:NA12878' \
-    {input.ref} {input.fwd} {input.rev} > {output}"
+     "bwa mem -t 8 -R '@RG\\tID:1\\tLB:library\\tPL:Illumina\\tPU:lane1\\tSM:NA12878' \
+     {input.ref} {input.fwd} {input.rev} > {output}"
 
 rule sam_to_bam:
   
   input:
-    "{sample}.sam"
+     "{sample}.sam"
     
   output:
     temp("{sample}.bam")
     
   shell:
-    "samtools view -b {input} -o {output} -@ 8"
+     "samtools view -b {input} -o {output} -@ 8"
 
 rule samtools_sort:
   
   input:
-        "mapped_reads/{sample}.bam"
+     "mapped_reads/{sample}.bam"
       
   output:
-        "sorted_reads/{sample}.bam"
+     "sorted_reads/{sample}.bam"
       
   shell:
-        "samtools sort -T sorted_reads/{wildcards.sample} "
-        "-O bam {input} > {output}"
+     "samtools sort -T sorted_reads/{wildcards.sample} "
+     "-O bam {input} > {output}"
     
 rule samtools_index:
   
   input:
-        "sorted_reads/{sample}.bam"
+     "sorted_reads/{sample}.bam"
+      
   output:
-        "sorted_reads/{sample}.bam.bai"
+     "sorted_reads/{sample}.bam.bai"
+      
   shell:
-        "samtools index {input}"
+     "samtools index {input}"
 
 rule samtools_flagstat:
   
   input:
     "{sample}.bam"
+    
   output:
     "{sample}_flagstats.txt"
+    
   shell:
     "samtools flagstat {input} -@ 8 > {output}"
 
@@ -172,17 +176,17 @@ rule snpsift_filter:
     "{sample}_CYP2C19.vcf"
     
   shell:
-    "cat {input} | SnpSift filter \"ANN[*].GENE = 'CYP2C19'\" > {output}"
+    "grep -w '^#\|^#CHROM\|chr[1-9]\|chr[1-2][0-9]\|chr[X,Y,M]' 'CYP2C19'\" > {output}"
     
 rule plot_quals:
   
   input:
-        "calls/{output}all.vcf"
+     "calls/{output}all.vcf"
       
   output:
-        "plots/{sample}quals.svg"
+     "plots/{sample}quals.svg"
       
   script:
-        "scripts/plot-quals.py"
+     "scripts/plot-quals.py"
       
       
